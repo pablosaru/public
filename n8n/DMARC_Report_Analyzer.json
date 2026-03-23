@@ -1,0 +1,408 @@
+{
+  "name": "DMARC Report Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres un analista de seguridad de email. Analizá los siguientes reportes DMARC y generá un informe en HTML con estas reglas:\n- Usá <h2> y <h3> para títulos\n- Usá emojis Unicode para estado: ✅ ok, ❌ fallo, ⚠️ advertencia, 🔴 crítico, 🟡 medio, 🟢 bajo\n- Usá <strong> para resaltar valores importantes\n- Usá <hr> para separar secciones\n- Usá <ul> y <li> para listas, nunca tablas\n- Sin CSS, sin estilos inline, sin DOCTYPE, solo el contenido HTML\nQue contenga: rango de fechas analizadas, resumen ejecutivo, estado por dominio, IPs con fallos y emails afectados, recomendaciones con prioridad.\nDatos: {{ JSON.stringify($json.data) }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2880,
+        192
+      ],
+      "id": "f4130e99-d106-4cdf-ad68-5111974487da",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2880,
+        384
+      ],
+      "id": "b65432ac-f9c8-449d-94bb-8c2b2539e57b",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        208
+      ],
+      "id": "65985df2-a26a-4f6b-b304-620fb7cb215a",
+      "name": "Manua Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "filtersUI": {
+          "values": {
+            "filters": {
+              "hasAttachments": true,
+              "foldersToInclude": [
+                "YOUR_OUTLOOK_FOLDER_ID"
+              ],
+              "receivedAfter": "={{ $now.minus({days:1}).startOf('day').toISO() }}",
+              "receivedBefore": "={{ $now.minus({days:0}).startOf('day').toISO() }}"
+            }
+          }
+        },
+        "options": {}
+      },
+      "id": "72da325f-870d-48aa-8c97-43125201d344",
+      "name": "Get Many Messages",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        208
+      ],
+      "webhookId": "d037d8c3-8589-4283-a392-3fb15e6fc288",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "YOUR_OUTLOOK_CREDENTIAL_ID",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "5d77de20-514d-4231-ae5c-96d55f62e59b",
+      "name": "Decompress",
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        2176,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2064,
+        208
+      ],
+      "id": "35caa4d0-b52b-41a8-a73c-b321918bc773",
+      "name": "Loop Over Items Mail"
+    },
+    {
+      "parameters": {
+        "resource": "messageAttachment",
+        "operation": "getAll",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "limit": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2176,
+        368
+      ],
+      "id": "9b6bae32-54d7-401a-b8f6-bb2ac07c54ec",
+      "name": "Get many attachments",
+      "webhookId": "dd4824c6-1532-462c-866c-04f573737a94",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "YOUR_OUTLOOK_CREDENTIAL_ID",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { attachmentId: items[0].json.id } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2336,
+        368
+      ],
+      "id": "57ba99cf-ce47-4786-92f6-aed3aa0e6aa1",
+      "name": "getAttach0"
+    },
+    {
+      "parameters": {
+        "resource": "messageAttachment",
+        "operation": "download",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items Mail').item.json.id }}",
+          "mode": "id"
+        },
+        "attachmentId": {
+          "__rl": true,
+          "value": "={{ $json.attachmentId }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        368
+      ],
+      "id": "7b889c79-f0b5-4d41-923f-5df7324df085",
+      "name": "Download an attachment",
+      "webhookId": "60b4afea-45d8-4d34-bee9-9c88b38f32ef",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "YOUR_OUTLOOK_CREDENTIAL_ID",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "file_0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        2336,
+        576
+      ],
+      "id": "7f8e94d3-0e8a-45c6-86f1-4e4d31002e8a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const xmlString = $input.item.json.data;\n\n// Parser XML nativo sin librerías\nconst parseValue = (xml, tag) => {\n  const match = xml.match(new RegExp(`<${tag}>(.*?)<\\/${tag}>`, 's'));\n  return match ? match[1].trim() : '';\n};\n\nconst parseAll = (xml, tag) => {\n  const matches = [...xml.matchAll(new RegExp(`<${tag}>(.*?)<\\/${tag}>`, 'gs'))];\n  return matches.map(m => m[1].trim());\n};\n\n// Metadata\nconst domain = parseValue(xmlString, 'domain');\nconst policy = parseValue(xmlString, 'p');\n\nconst dateBegin = parseInt(parseValue(xmlString, 'begin'));\nconst dateEnd = parseInt(parseValue(xmlString, 'end'));\nconst dateFrom = new Date(dateBegin * 1000).toLocaleDateString('es-AR');\nconst dateTo = new Date(dateEnd * 1000).toLocaleDateString('es-AR');\n\n// Records\nconst recordBlocks = [...xmlString.matchAll(/<record>(.*?)<\\/record>/gs)].map(m => m[1]);\n\nconst records = recordBlocks.map(r => ({\n  source_ip: parseValue(r, 'source_ip'),\n  count: parseInt(parseValue(r, 'count')),\n  dkim: parseValue(r, 'dkim'),\n  spf: parseValue(r, 'spf'),\n  envelope_from: parseValue(r, 'envelope_from'),\n  header_from: parseValue(r, 'header_from')\n}));\n\nconst total = records.reduce((acc, r) => acc + r.count, 0);\nconst failures = records.filter(r => r.dkim === 'fail' || r.spf === 'fail');\n\nreturn {\n  json: {\n    domain,\n    policy,\n    date_from: dateFrom,\n    date_to: dateTo,\n    total_emails: total,\n    total_records: records.length,\n    failures_count: failures.length,\n    records,\n    failures\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        576
+      ],
+      "id": "7109819e-a113-44fc-9b42-6b0bc2b39141",
+      "name": "parserXML"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        192
+      ],
+      "id": "75d59c5b-39de-40ab-941d-a8bf7d790cd8",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "toRecipients": "your@email.com",
+        "subject": "=[Seguridad IT] Informe DMARC — {{ $now.toFormat('dd/MM/yyyy') }}",
+        "bodyContent": "={{ $json.text }}",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        3232,
+        192
+      ],
+      "id": "39d79a75-d53e-47af-aca5-ebd7fd734d4d",
+      "name": "Send a message",
+      "webhookId": "b2b5ccc0-7dd5-494f-8732-ca907d410b76",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "YOUR_OUTLOOK_CREDENTIAL_ID",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manua Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Many Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Many Messages": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decompress": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items Mail": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many attachments": {
+      "main": [
+        [
+          {
+            "node": "getAttach0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getAttach0": {
+      "main": [
+        [
+          {
+            "node": "Download an attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download an attachment": {
+      "main": [
+        [
+          {
+            "node": "Decompress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "parserXML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parserXML": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2dc8527b-9eb9-4d9e-9bfd-8e883abac040",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f24e21732ff6e5ba2e75249ccea8542626901d0bef5f267dfe8e6d5352e533e9"
+  },
+  "id": "mbQzFETiSzplwMU0",
+  "tags": []
+}
