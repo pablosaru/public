@@ -1,0 +1,594 @@
+{
+  "info": {
+    "_postman_id": "bc5b8bcc-d5b5-482d-8487-d5c1296a82fe",
+    "name": "Qualys",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25644626"
+  },
+  "item": [
+    {
+      "name": "Obtener JWT Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Capturar el token de la respuesta (viene como plain text)",
+              "const token = pm.response.text().trim();",
+              "",
+              "if (token && token.length > 10) {",
+              "    // Guardar en variable de colección para que esté disponible en todos los requests",
+              "    pm.collectionVariables.set('jwt_token', token);",
+              "    console.log('✅ Token JWT guardado correctamente.');",
+              "    console.log('Token (primeros 50 chars):', token.substring(0, 50) + '...');",
+              "",
+              "    pm.test('Token obtenido correctamente', function () {",
+              "        pm.expect(token).to.not.be.empty;",
+              "    });",
+              "} else {",
+              "    console.log('❌ No se recibió token. Verificá usuario y contraseña.');",
+              "    pm.test('Token obtenido correctamente', function () {",
+              "        pm.expect.fail('No se recibió token válido.');",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{qualys_username}}",
+              "description": "Usuario de Qualys"
+            },
+            {
+              "key": "password",
+              "value": "{{qualys_password}}",
+              "description": "Contraseña de Qualys"
+            },
+            {
+              "key": "token",
+              "value": "true"
+            }
+          ]
+        },
+        "url": {
+          "raw": "https://{{qualys_gateway}}/auth",
+          "protocol": "https",
+          "host": [
+            "{{qualys_gateway}}"
+          ],
+          "path": [
+            "auth"
+          ]
+        },
+        "description": "Autentica contra el gateway de Qualys y guarda el JWT automáticamente en la variable {{jwt_token}} de la colección."
+      },
+      "response": []
+    },
+    {
+      "name": "createStaticTagAplicativas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Parsear la respuesta XML",
+              "const responseXml = pm.response.text();",
+              "",
+              "// Extraer el ID con regex",
+              "const match = responseXml.match(/<id>(\\d+)<\\/id>/);",
+              "",
+              "if (match && match[1]) {",
+              "    const tagId = match[1];",
+              "    ",
+              "    // Guardarlo como variable de entorno",
+              "    pm.environment.set(\"parent_tag_id\", tagId);",
+              "    ",
+              "    console.log(\"Tag ID guardado: \" + tagId);",
+              "    pm.test(\"Tag ID extraído correctamente\", () => pm.expect(tagId).to.not.be.empty);",
+              "} else {",
+              "    pm.test(\"No se pudo extraer el Tag ID\", () => { throw new Error(\"ID no encontrado en la respuesta\"); });",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "{{qualys_pass}}",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "{{qualys_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml",
+            "type": "text"
+          },
+          {
+            "key": "X-Requested-With",
+            "value": "Postman",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<ServiceRequest>\n  <data>\n    <Tag>\n      <name>Aplicativas</name>\n      <description>Vulnerabilidades Aplicativas</description>\n      <ruleText></ruleText>\n    </Tag>\n  </data>\n</ServiceRequest>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://{{qualys_api_base_url}}/qps/rest/2.0/create/am/tag",
+          "protocol": "https",
+          "host": [
+            "{{qualys_api_base_url}}"
+          ],
+          "path": [
+            "qps",
+            "rest",
+            "2.0",
+            "create",
+            "am",
+            "tag"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getIdTagAplicativas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseXml = pm.response.text();",
+              "const match = responseXml.match(/<id>(\\d+)<\\/id>/);",
+              "",
+              "if (match && match[1]) {",
+              "    pm.environment.set(\"parent_tag_id\", match[1]);",
+              "    console.log(\"Parent Tag ID encontrado: \" + match[1]);",
+              "    pm.test(\"Parent tag ID capturado\", () => pm.expect(match[1]).to.not.be.empty);",
+              "} else {",
+              "    pm.test(\"No se encontró el tag 'Aplicativas'\", () => { ",
+              "        throw new Error(\"Verificar que el tag existe\"); ",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "{{qualys_pass}}",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "{{qualys_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml",
+            "type": "text"
+          },
+          {
+            "key": "X-Requested-With",
+            "value": "Postman",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ServiceRequest>\n  <filters>\n    <Criteria field=\"name\" operator=\"EQUALS\">Aplicativas</Criteria>\n  </filters>\n</ServiceRequest>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://{{qualys_api_base_url}}/qps/rest/2.0/search/am/tag",
+          "protocol": "https",
+          "host": [
+            "{{qualys_api_base_url}}"
+          ],
+          "path": [
+            "qps",
+            "rest",
+            "2.0",
+            "search",
+            "am",
+            "tag"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "addDynamicTagTomcat",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "{{qualys_pass}}",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "{{qualys_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Requested-With",
+            "value": "Postman",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Nginx\",\n  \"description\": \"\",\n  \"favorite\": false,\n  \"rule\": \"vulnerabilities.vulnerability.vendors.productName:[⁠`nginx`]\",\n  \"engine\": \"VULN_DETECTION\",\n  \"evalAll\": true,\n  \"ruleSet\": true,\n  \"parentId\": {{parent_tag_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://{{qualys_web_base_url}}/portal-front/rest/assetview/1.0/tags/create",
+          "protocol": "https",
+          "host": [
+            "{{qualys_web_base_url}}"
+          ],
+          "path": [
+            "portal-front",
+            "rest",
+            "assetview",
+            "1.0",
+            "tags",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getSolutionByQID",
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "{{qualys_pass}}",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "{{qualys_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Requested-With",
+            "value": "Postman",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "action",
+              "value": "list",
+              "type": "text",
+              "uuid": "5cb290cd-5eaf-42fe-a2ab-a363bad0402f"
+            },
+            {
+              "key": "ids",
+              "value": "361429",
+              "type": "text",
+              "uuid": "343d41e0-df38-4adf-b440-f6ee11ff6ec1"
+            },
+            {
+              "key": "details",
+              "value": "All",
+              "type": "text",
+              "uuid": "e47e4ac6-3d97-4208-a464-0bcbed336903"
+            }
+          ]
+        },
+        "url": {
+          "raw": "https://{{qualys_api_base_url}}/api/2.0/fo/knowledge_base/vuln/",
+          "protocol": "https",
+          "host": [
+            "{{qualys_api_base_url}}"
+          ],
+          "path": [
+            "api",
+            "2.0",
+            "fo",
+            "knowledge_base",
+            "vuln",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getSolutionByQID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Parsear el XML de la respuesta",
+              "const responseText = pm.response.text();",
+              "",
+              "// Extraer el contenido del tag <SOLUTION> con regex",
+              "const solutionMatch = responseText.match(/<SOLUTION><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/SOLUTION>/);",
+              "",
+              "if (solutionMatch && solutionMatch[1]) {",
+              "    const solution = solutionMatch[1].trim();",
+              "    ",
+              "    // Mostrar en la consola de Postman (View > Show Postman Console)",
+              "    console.log(\"=== SOLUCIÓN / REMEDIACIÓN ===\");",
+              "    console.log(solution);",
+              "    ",
+              "    // Guardar como variable de entorno para reutilizar",
+              "    pm.environment.set(\"vuln_solution\", solution);",
+              "    ",
+              "    // Mostrar como test visible en la pestaña \"Test Results\"",
+              "    pm.test(\"Remediación encontrada\", function () {",
+              "        pm.expect(solution).to.not.be.empty;",
+              "        console.log(solution);",
+              "    });",
+              "",
+              "} else {",
+              "    // Intentar match sin CDATA (algunos QIDs no lo usan)",
+              "    const solutionPlain = responseText.match(/<SOLUTION>([\\s\\S]*?)<\\/SOLUTION>/);",
+              "    ",
+              "    if (solutionPlain && solutionPlain[1]) {",
+              "        console.log(\"=== SOLUCIÓN / REMEDIACIÓN ===\");",
+              "        console.log(solutionPlain[1].trim());",
+              "        pm.environment.set(\"vuln_solution\", solutionPlain[1].trim());",
+              "    } else {",
+              "        console.log(\"No se encontró el campo SOLUTION en la respuesta.\");",
+              "        pm.test(\"SOLUTION no encontrado\", function () {",
+              "            pm.expect.fail(\"El QID consultado no tiene campo SOLUTION o hubo un error.\");",
+              "        });",
+              "    }",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "{{qualys_pass}}",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "{{qualys_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Requested-With",
+            "value": "Postman",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": []
+        },
+        "url": {
+          "raw": "https://{{qualys_api_base_url}}/api/2.0/fo/knowledge_base/vuln/?action=list&ids=361429&details=All",
+          "protocol": "https",
+          "host": [
+            "{{qualys_api_base_url}}"
+          ],
+          "path": [
+            "api",
+            "2.0",
+            "fo",
+            "knowledge_base",
+            "vuln",
+            ""
+          ],
+          "query": [
+            {
+              "key": "action",
+              "value": "list"
+            },
+            {
+              "key": "ids",
+              "value": "361429"
+            },
+            {
+              "key": "details",
+              "value": "All"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getSolutionByCVE-FAIL",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseText = pm.response.text();",
+              "",
+              "// Extraer todos los bloques <VULN>",
+              "const vulnBlocks = responseText.match(/<VULN>[\\s\\S]*?<\\/VULN>/g);",
+              "",
+              "if (!vulnBlocks) {",
+              "    console.log(\"No se encontraron vulnerabilidades para el CVE indicado.\");",
+              "} else {",
+              "    console.log(`Se encontraron ${vulnBlocks.length} QID(s) asociados al CVE.\\n`);",
+              "",
+              "    vulnBlocks.forEach((block, index) => {",
+              "        const get = (tag) => {",
+              "            const m = block.match(new RegExp(`<${tag}><!\\\\[CDATA\\\\[([\\\\s\\\\S]*?)\\\\]\\\\]><\\\\/${tag}>`))",
+              "                   || block.match(new RegExp(`<${tag}>([\\\\s\\\\S]*?)<\\\\/${tag}>`));",
+              "            return m ? m[1].trim() : \"No disponible\";",
+              "        };",
+              "",
+              "        console.log(`\\n============================`);",
+              "        console.log(`QID #${index + 1}: ${get(\"QID\")}`);",
+              "        console.log(`TÍTULO:       ${get(\"TITLE\")}`);",
+              "        console.log(`CVEs:         ${get(\"CVE_LIST\") || \"Ver respuesta completa\"}`);",
+              "        console.log(`SOLUCIÓN:     ${get(\"SOLUTION\")}`);",
+              "        console.log(`============================`);",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "password",
+              "value": "{{qualys_pass}}",
+              "type": "string"
+            },
+            {
+              "key": "username",
+              "value": "{{qualys_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Requested-With",
+            "value": "Postman",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": []
+        },
+        "url": {
+          "raw": "https://{{qualys_api_base_url}}/api/2.0/fo/knowledge_base/vuln/?action=list&details=All&cve=CVE-2025-47912",
+          "protocol": "https",
+          "host": [
+            "{{qualys_api_base_url}}"
+          ],
+          "path": [
+            "api",
+            "2.0",
+            "fo",
+            "knowledge_base",
+            "vuln",
+            ""
+          ],
+          "query": [
+            {
+              "key": "action",
+              "value": "list",
+              "type": "text"
+            },
+            {
+              "key": "details",
+              "value": "All",
+              "type": "text"
+            },
+            {
+              "key": "cve",
+              "value": "CVE-2025-47912",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
