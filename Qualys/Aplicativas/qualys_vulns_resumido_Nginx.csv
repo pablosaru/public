@@ -1,0 +1,46 @@
+assetName,qid,Solution,PUBLISHED_DATETIME
+apic-cmz-01-mgmt.bancogalicia.com.ar,730432,"<P>Patch is not available, for more information about this vulnerability please refer to <A HREF=""https://securityonline.info/nginx-zero-day-rce-vulnerability-alert/"" TARGET=""_BLANK""> Nginx RCE Vulnerability</A></P>",2022-04-11T13:00:11Z
+apic-cmz-02-mgmt.bancogalicia.com.ar,730432,"<P>Patch is not available, for more information about this vulnerability please refer to <A HREF=""https://securityonline.info/nginx-zero-day-rce-vulnerability-alert/"" TARGET=""_BLANK""> Nginx RCE Vulnerability</A></P>",2022-04-11T13:00:11Z
+apic-cmz-03-mgmt.bancogalicia.com.ar,730432,"<P>Patch is not available, for more information about this vulnerability please refer to <A HREF=""https://securityonline.info/nginx-zero-day-rce-vulnerability-alert/"" TARGET=""_BLANK""> Nginx RCE Vulnerability</A></P>",2022-04-11T13:00:11Z
+apic-pga-01-mgmt.bancogalicia.com.ar,730432,"<P>Patch is not available, for more information about this vulnerability please refer to <A HREF=""https://securityonline.info/nginx-zero-day-rce-vulnerability-alert/"" TARGET=""_BLANK""> Nginx RCE Vulnerability</A></P>",2022-04-11T13:00:11Z
+apic-pga-02-mgmt.bancogalicia.com.ar,730432,"<P>Patch is not available, for more information about this vulnerability please refer to <A HREF=""https://securityonline.info/nginx-zero-day-rce-vulnerability-alert/"" TARGET=""_BLANK""> Nginx RCE Vulnerability</A></P>",2022-04-11T13:00:11Z
+apic-pga-03-mgmt.bancogalicia.com.ar,730432,"<P>Patch is not available, for more information about this vulnerability please refer to <A HREF=""https://securityonline.info/nginx-zero-day-rce-vulnerability-alert/"" TARGET=""_BLANK""> Nginx RCE Vulnerability</A></P>",2022-04-11T13:00:11Z
+dmawida01,106145,"<P>Update to the  latest version of <A HREF=""http://nginx.org/en/download.html"" TARGET=""_blank"">nginx</A> <P> ",2023-08-10T13:07:05Z
+dwasadmcent01,762758,"Refer to SUSE security advisory <A HREF=""https://lists.suse.com/pipermail/sle-security-updates/2026-May/026275.html"" TARGET=""_blank""> SUSE-SU-2026:2050-1</A> for updates and patch information.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://lists.suse.com/pipermail/sle-security-updates/2026-May/026275.html"" TARGET=""_blank"">SUSE-SU-2026:2050-1:SUSE Enterprise Linux</A>",2026-05-26T13:21:03Z
+mdscmz1-new.bancogalicia.com.ar,730096,"Customers are advised to install <A HREF=""https://nginx.org/en/download.html"" TARGET=""_blank"">nginx 1.21.0, 1.20.1 </A> to remediate this vulnerability.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://nginx.org/en/security_advisories.html"" TARGET=""_blank"">Nginx</A>",2021-06-09T13:54:21Z
+mdscmz2-new.bancogalicia.com.ar,730096,"Customers are advised to install <A HREF=""https://nginx.org/en/download.html"" TARGET=""_blank"">nginx 1.21.0, 1.20.1 </A> to remediate this vulnerability.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://nginx.org/en/security_advisories.html"" TARGET=""_blank"">Nginx</A>",2021-06-09T13:54:21Z
+mdspga1.bancogalicia.com.ar,732476,"<P>Patch is also available, for more information about this vulnerability please refer to <A HREF=""https://nginx.org/en/security_advisories.html"" TARGET=""_BLANK""> NGINX Security Advisory</A></P>
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://nginx.org/en/security_advisories.html"" TARGET=""_blank"">NGINX Security Advisory</A>",2025-05-06T11:24:49Z
+paap2.bancogalicia.com.ar,106145,"<P>Update to the  latest version of <A HREF=""http://nginx.org/en/download.html"" TARGET=""_blank"">nginx</A> <P> ",2023-08-10T13:07:05Z
+pmaocpclb01.bancogalicia.com.ar,6050644,"Refer to Red Hat security advisory <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374</A> for updates and patch information.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374:Red Hat Enterprise Linux</A>",2026-05-21T14:22:24Z
+pmaocpclb02.bancogalicia.com.ar,6050644,"Refer to Red Hat security advisory <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374</A> for updates and patch information.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374:Red Hat Enterprise Linux</A>",2026-05-21T14:22:24Z
+pmawida01,106145,"<P>Update to the  latest version of <A HREF=""http://nginx.org/en/download.html"" TARGET=""_blank"">nginx</A> <P> ",2023-08-10T13:07:05Z
+pmzconnclb01,6050644,"Refer to Red Hat security advisory <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374</A> for updates and patch information.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374:Red Hat Enterprise Linux</A>",2026-05-21T14:22:24Z
+pzabbixs01.bancogalicia.com.ar,6050644,"Refer to Red Hat security advisory <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374</A> for updates and patch information.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374:Red Hat Enterprise Linux</A>",2026-05-21T14:22:24Z
+pzabbixs02.bancogalicia.com.ar,6050644,"Refer to Red Hat security advisory <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374</A> for updates and patch information.
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF=""https://access.redhat.com/errata/RHSA-2026:19374"" TARGET=""_blank"">RHSA-2026:19374:Red Hat Enterprise Linux</A>",2026-05-21T14:22:24Z

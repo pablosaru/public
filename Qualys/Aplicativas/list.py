@@ -1,6 +1,5 @@
 import os
 import requests
-import certifi_win32
 import json
 import xml.etree.ElementTree as ET
 import csv
@@ -17,22 +16,30 @@ def crear_session():
     session = requests.Session()
 
     session.headers.update({
-        "User-Agent": "PostmanRuntime/7.32.3",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0",
         "Accept": "*/*",
         "Connection": "keep-alive",
         "Accept-Encoding": "gzip, deflate, br"
     })
 
     session.auth = (QUALYS_USER, QUALYS_PASS)
-    #session.verify = False
 
-    session.headers.update({
-        "User-Agent": "PostmanRuntime/7.32.3",
-        "Accept": "*/*",
-        "Cookie": "QualysSession=c167d742cc96dc9a61f59ae913637def; Path=/; Secure; HttpOnly;"
-    })
+    # Primer request al endpoint — debería devolver Set-Cookie automáticamente
+    resp = session.get(
+        "https://qualysguard.qg3.apps.qualys.com/portal-front/rest/assetview/1.0/assetvuln/v2",
+        params={"limit": 1, "offset": 0, "fields": "qid"},
+        timeout=30,
+        allow_redirects=True  # seguir redirects para que complete el flujo
+    )
 
-    print("Cookies:", session.cookies.get_dict())
+    print(f"[INFO] Init session: HTTP {resp.status_code}")
+    print(f"[INFO] Cookies obtenidas: {dict(session.cookies)}")
+    print(f"[INFO] Set-Cookie header: {resp.headers.get('Set-Cookie')}")
+
+    if not session.cookies:
+        raise Exception("[ERROR] No se obtuvo ninguna cookie.")
+
     return session
 
 def obtener_vulnerabilidades(session, tag="Apache"):
@@ -41,7 +48,7 @@ def obtener_vulnerabilidades(session, tag="Apache"):
     base_url = "https://qualysguard.qg3.apps.qualys.com/portal-front/rest/assetview/1.0/assetvuln/v2"
 
     offset = 0
-    limit = 25
+    limit = 250
     resultado = []
 
     headers = {
@@ -115,9 +122,8 @@ def obtener_vulnerabilidades(session, tag="Apache"):
 
 
 
-def obtener_soluciones(session, resultado):
-    # Obtener QIDs únicos
-    qids_unicos = { str(item.get("qid")) for item in resultado if item.get("qid") }
+def obtener_soluciones(resultado):
+    qids_unicos = {str(item.get("qid")) for item in resultado if item.get("qid")}
     strQid = ",".join(qids_unicos)
 
     urlkb = "https://qualysapi.qg3.apps.qualys.com/api/2.0/fo/knowledge_base/vuln/"
@@ -135,10 +141,13 @@ def obtener_soluciones(session, resultado):
         "Accept-Encoding": "gzip, deflate, br"
     }
 
-    # response_kb = requests.post(urlkb, auth=(QUALYS_USER, QUALYS_PASS), headers=headers, params=params, verify=False, timeout=60)
-    #response_kb = requests.post(urlkb, auth=(QUALYS_USER, QUALYS_PASS), headers=headers, params=params, timeout=60)
-    response_kb = session.post(urlkb, auth=(QUALYS_USER, QUALYS_PASS), headers=headers, params=params, timeout=60)
-
+    response_kb = requests.post(
+        urlkb,
+        auth=(QUALYS_USER, QUALYS_PASS),  # Basic Auth directo
+        headers=headers,
+        params=params,
+        timeout=60
+    )
     time.sleep(1 + random.uniform(0.5, 1.5))
 
     kb_data = response_kb.text
@@ -226,12 +235,9 @@ def resumir_por_asset(resultado_completo):
 def main():
     tag = sys.argv[1] if len(sys.argv) > 1 else "Apache"
 
-    session1 = crear_session()
-    resultado = obtener_vulnerabilidades(session1, tag)
-
-    session2 = crear_session()
-    resultado_completo = obtener_soluciones(session2, resultado)
-
+    session = crear_session()
+    resultado = obtener_vulnerabilidades(session, tag)
+    resultado_completo = obtener_soluciones(resultado)
     resultado_resumido = resumir_por_asset(resultado_completo)
     
     tag_safe = re.sub(r'[^a-zA-Z0-9_-]', '_', tag)
@@ -243,6 +249,12 @@ def main():
 
     print(f"CSV generado: {csv_file}")
 
+    session.post(
+        "https://qualysguard.qg3.apps.qualys.com/api/2.0/fo/session/",
+        data={"action": "logout"},
+        headers={"X-Requested-With": "Postman"},
+        timeout=15
+    )
 
 
 if __name__ == "__main__":
