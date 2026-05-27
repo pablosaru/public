@@ -1,0 +1,3 @@
+requests
+certifi 
+python-certifi-win32
